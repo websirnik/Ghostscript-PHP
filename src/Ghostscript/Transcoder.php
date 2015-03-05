@@ -51,9 +51,9 @@ class Transcoder extends AbstractBinary
             throw new RuntimeException('Ghostscript was unable to transcode to Image', $e->getCode(), $e);
         }
 
-        if (!file_exists($destination)) {
-            throw new RuntimeException('Ghostscript was unable to transcode to Image');
-        }
+        // if (!file_exists($destination)) {
+        //    throw new RuntimeException('Ghostscript was unable to transcode to Image');
+        // }
 
         return $this;
     }
