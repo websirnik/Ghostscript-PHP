@@ -29,17 +29,24 @@ class Transcoder extends AbstractBinary
      *
      * @throws RuntimeException In case of failure
      */
-    public function toImage($input, $destination)
+    public function toImage($input, $destination, $numPages)
     {
-        try {
-            $this->command(array(
+        $commands = array(
                 '-sDEVICE=jpeg',
                 '-dNOPAUSE',
                 '-dBATCH',
                 '-dSAFER',
+                '-dJPEGQ=75',
+                '-r300x300',
                 '-sOutputFile=' . $destination,
                 $input,
-            ));
+            );
+
+        if($numPages)
+            $commands = array_merge(['-dFirstPage=1', '-dLastPage='.$numPages], $commands);
+
+        try {
+            $this->command($commands, true);
         } catch (ExecutionFailureException $e) {
             throw new RuntimeException('Ghostscript was unable to transcode to Image', $e->getCode(), $e);
         }
