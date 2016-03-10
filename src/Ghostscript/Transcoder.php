@@ -58,6 +58,45 @@ class Transcoder extends AbstractBinary
         return $this;
     }
 
+
+    /**
+     * Transcode a PDF to another PDF
+     *
+     * @param string  $input        The path to the input file.
+     * @param string  $destination  The path to the output file.
+     * @param integer $quality    The number of the first page.
+     *
+     * @return Optimize
+     *
+     * @throws RuntimeException In case of failure
+     */
+    public function optimizePDF($input, $destination, $quality)
+    {
+        try {
+            $this->command(array(
+                '-sDEVICE=pdfwrite',
+                '-dCompatibilityLevel=1.4',
+                sprintf('-dPDFSETTINGS=/%s', $quality),
+                '-dNOPAUSE',
+                '-dBATCH',
+                '-dQUIET',
+                '-dColorConversionStrategy=/sRGB',
+                '-dProcessColorModel=/DeviceRGB',
+                '-dColorConversionStrategyForImages=/DeviceRGB',
+                '-sOutputFile=' . $destination,
+                $input,
+            ));
+        } catch (ExecutionFailureException $e) {
+            throw new RuntimeException('Ghostscript was unable to optimize PDF', $e->getCode(), $e);
+        }
+
+        if (!file_exists($destination)) {
+            throw new RuntimeException('Ghostscript was unable to optimize PDF');
+        }
+
+        return $this;
+    }
+
     /**
      * Transcode a PDF to another PDF
      *
