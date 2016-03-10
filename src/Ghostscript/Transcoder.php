@@ -29,7 +29,7 @@ class Transcoder extends AbstractBinary
      *
      * @throws RuntimeException In case of failure
      */
-    public function toImage($input, $destination, $numPages)
+    public function toImages($input, $destination, $numPages)
     {
         $commands = array(
                 '-sDEVICE=jpeg',
@@ -44,6 +44,44 @@ class Transcoder extends AbstractBinary
 
         if($numPages)
             $commands = array_merge(['-dFirstPage=1', '-dLastPage='.$numPages], $commands);
+
+        try {
+            $this->command($commands, true);
+        } catch (ExecutionFailureException $e) {
+            throw new RuntimeException('Ghostscript was unable to transcode to Image', $e->getCode(), $e);
+        }
+
+        // if (!file_exists($destination)) {
+        //    throw new RuntimeException('Ghostscript was unable to transcode to Image');
+        // }
+
+        return $this;
+    }
+
+    /**
+     * Transcode a PDF to an image.
+     *
+     * @param string $input          The path to the input file.
+     * @param string $destinationThe path to the output file.
+     *
+     * @return Transcoder
+     *
+     * @throws RuntimeException In case of failure
+     */
+    public function toImage($input, $destination, $pageNum)
+    {
+        $commands = array(
+                '-sDEVICE=jpeg',
+                '-dNOPAUSE',
+                '-dBATCH',
+                '-dSAFER',
+                '-dJPEGQ=75',
+                '-r300x300',
+                '-sOutputFile=' . $destination,
+                '-dFirstPage=' . $pageNum,
+                '-dLastPage=' . $pageNum,
+                $input,
+            );
 
         try {
             $this->command($commands, true);
