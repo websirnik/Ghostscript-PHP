@@ -34,4 +34,18 @@ class TranscoderTest extends \PHPUnit_Framework_TestCase
 
         unlink($dest);
     }
+
+    public function testTranscodeAddBookmarks()
+    {
+        $input = __DIR__ . '/../../files/bookmarks_input.pdf';
+        $bookmarks = __DIR__ . '/../../files/bookmarks';
+        $output = tempnam(sys_get_temp_dir(), 'gs_temp') . '.pdf';
+
+        $this->object->addBookmarks($input, $output, $bookmarks);
+
+        $this->assertTrue(file_exists($output));
+        $this->assertGreaterThan(0, filesize($output));
+
+        unlink($output);
+    }
 }

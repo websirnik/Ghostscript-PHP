@@ -22,8 +22,9 @@ class Transcoder extends AbstractBinary
     /**
      * Transcode a PDF to an image.
      *
-     * @param string $input          The path to the input file.
-     * @param string $destinationThe path to the output file.
+     * @param string $input The path to the input file.
+     * @param string $destination The path to the output file.
+     * @param int $numPages
      *
      * @return Transcoder
      *
@@ -32,18 +33,18 @@ class Transcoder extends AbstractBinary
     public function toImages($input, $destination, $numPages)
     {
         $commands = array(
-                '-sDEVICE=jpeg',
-                '-dNOPAUSE',
-                '-dBATCH',
-                '-dSAFER',
-                '-dJPEGQ=75',
-                '-r300x300',
-                '-sOutputFile=' . $destination,
-                $input,
-            );
+            '-sDEVICE=jpeg',
+            '-dNOPAUSE',
+            '-dBATCH',
+            '-dSAFER',
+            '-dJPEGQ=75',
+            '-r300x300',
+            '-sOutputFile=' . $destination,
+            $input,
+        );
 
-        if($numPages)
-            $commands = array_merge(['-dFirstPage=1', '-dLastPage='.$numPages], $commands);
+        if ($numPages)
+            $commands = array_merge(['-dFirstPage=1', '-dLastPage=' . $numPages], $commands);
 
         try {
             $this->command($commands, true);
@@ -61,27 +62,28 @@ class Transcoder extends AbstractBinary
     /**
      * Transcode a PDF to an image.
      *
-     * @param string $input          The path to the input file.
-     * @param string $destinationThe path to the output file.
+     * @param string $input The path to the input file.
+     * @param string $destination The path to the output file.
+     * @param int $pageNum
      *
      * @return Transcoder
      *
      * @throws RuntimeException In case of failure
      */
-    public function toImage($input, $destination, $pageNum)
+    public function toImage($input, $destination, $pageNum = 1)
     {
         $commands = array(
-                '-sDEVICE=jpeg',
-                '-dNOPAUSE',
-                '-dBATCH',
-                '-dSAFER',
-                '-dJPEGQ=75',
-                '-r300x300',
-                '-sOutputFile=' . $destination,
-                '-dFirstPage=' . $pageNum,
-                '-dLastPage=' . $pageNum,
-                $input,
-            );
+            '-sDEVICE=jpeg',
+            '-dNOPAUSE',
+            '-dBATCH',
+            '-dSAFER',
+            '-dJPEGQ=75',
+            '-r300x300',
+            '-sOutputFile=' . $destination,
+            '-dFirstPage=' . $pageNum,
+            '-dLastPage=' . $pageNum,
+            $input,
+        );
 
         try {
             $this->command($commands, true);
@@ -96,15 +98,47 @@ class Transcoder extends AbstractBinary
         return $this;
     }
 
+    /**
+     * Add bookmarks to pdf file
+     *
+     * @param string $input     The path to the input file.
+     * @param string $output    The path to the output file.
+     * @param string $bookmarks The path to the bookmarks file.
+     *
+     * @return Transcoder
+     *
+     * @throws RuntimeException In case of failure
+     */
+    public function addBookmarks($input, $output, $bookmarks)
+    {
+        try {
+            $this->command(array(
+                '-dBATCH',
+                '-dNOPAUSE',
+                '-sDEVICE=pdfwrite',
+                '-sOutputFile=' . $output,
+                $input,
+                $bookmarks
+            ), true);
+        } catch (ExecutionFailureException $e) {
+            throw new RuntimeException('Ghostscript was unable to add bookmarks', $e->getCode(), $e);
+        }
+
+        if (!file_exists($output)) {
+            throw new RuntimeException('Ghostscript was unable to add bookmarks');
+        }
+
+        return $this;
+    }
 
     /**
      * Transcode a PDF to another PDF
      *
-     * @param string  $input        The path to the input file.
-     * @param string  $destination  The path to the output file.
-     * @param integer $quality    The number of the first page.
+     * @param string $input The path to the input file.
+     * @param string $destination The path to the output file.
+     * @param integer $quality The number of the first page.
      *
-     * @return Optimize
+     * @return Transcoder
      *
      * @throws RuntimeException In case of failure
      */
@@ -138,9 +172,9 @@ class Transcoder extends AbstractBinary
     /**
      * Transcode a PDF to another PDF
      *
-     * @param string  $input        The path to the input file.
-     * @param string  $destination  The path to the output file.
-     * @param integer $pageStart    The number of the first page.
+     * @param string $input The path to the input file.
+     * @param string $destination The path to the output file.
+     * @param integer $pageStart The number of the first page.
      * @param integer $pageQuantity The number of page to include.
      *
      * @return Transcoder
@@ -175,7 +209,7 @@ class Transcoder extends AbstractBinary
      * Creates a Transcoder.
      *
      * @param array|ConfigurationInterface $configuration
-     * @param LoggerInterface              $logger
+     * @param LoggerInterface $logger
      *
      * @return Transcoder
      */
