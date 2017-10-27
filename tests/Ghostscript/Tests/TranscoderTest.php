@@ -59,10 +59,11 @@ class TranscoderTest extends \PHPUnit_Framework_TestCase
         }
 
         $input = __DIR__ . '/../../files/test.pdf';
-        $destination = __DIR__ . '/../../files';
-        $jsonText = $this->object->extractText($input, $destination, 1, 10);
+        $jsonText = $this->object->extractText($input, 1, 10);
 
         $this->assertTrue(strlen($jsonText) > 0);
         $this->assertTrue(isJSON($jsonText));
+
+        var_dump($jsonText);
     }
 }

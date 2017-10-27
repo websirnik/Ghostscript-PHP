@@ -208,18 +208,13 @@ class Transcoder extends AbstractBinary
 
     /**
      * @param string $input The path to the input file.
-     * @param string $destination The path to the output file.
      * @param integer $pageStart The number of the first page.
      * @param integer $pageQuantity The number of page to include.
      * @return $this
      */
-    public function extractText($input, $destination, $pageStart, $pageQuantity)
+    public function extractText($input, $pageStart, $pageQuantity)
     {
-        if (!file_exists($destination)) {
-            throw new RuntimeException('Ghostscript was unable to extract text from PDF');
-        }
-
-        $outputName = Uuid::uuid4()->toString();
+        $destination = tempnam(sys_get_temp_dir(),  Uuid::uuid4()->toString());
         try {
             $this->command(array(
                 '-sDEVICE=txtwrite',
@@ -227,7 +222,7 @@ class Transcoder extends AbstractBinary
                 '-dBATCH',
                 sprintf('-dFirstPage=%d', $pageStart),
                 sprintf('-dLastPage=%d', ($pageStart + $pageQuantity - 1)),
-                '-sOutputFile=' . $destination . '/' . $outputName . '%d',
+                '-sOutputFile=' . $destination . '%d',
                 $input,
             ));
         } catch (ExecutionFailureException $e) {
@@ -236,7 +231,7 @@ class Transcoder extends AbstractBinary
 
         $pages = array();
         for ($i = $pageStart; $i <= $pageQuantity; $i++) {
-            $filePath = $destination . '/' . $outputName . $i;
+            $filePath = $destination . $i;
             array_push($pages, file_get_contents($filePath));
             unlink($filePath);
         }
