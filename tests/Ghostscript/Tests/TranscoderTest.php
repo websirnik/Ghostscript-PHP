@@ -4,6 +4,7 @@ namespace Ghostscript\Tests;
 
 use Ghostscript\Transcoder;
 
+
 class TranscoderTest extends \PHPUnit_Framework_TestCase
 {
     protected $object;
@@ -47,5 +48,21 @@ class TranscoderTest extends \PHPUnit_Framework_TestCase
         $this->assertGreaterThan(0, filesize($output));
 
         unlink($output);
+    }
+
+
+    public function testTranscodeExtractText()
+    {
+        function isJSON($string)
+        {
+            return is_string($string) && is_array(json_decode($string, true)) && (json_last_error() == JSON_ERROR_NONE) ? true : false;
+        }
+
+        $input = __DIR__ . '/../../files/test.pdf';
+        $destination = __DIR__ . '/../../files';
+        $jsonText = $this->object->extractText($input, $destination, 1, 10);
+
+        $this->assertTrue(strlen($jsonText) > 0);
+        $this->assertTrue(isJSON($jsonText));
     }
 }

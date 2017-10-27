@@ -8,6 +8,7 @@ use Ghostscript\Exception\RuntimeException;
 use Alchemy\BinaryDriver\Configuration;
 use Alchemy\BinaryDriver\ConfigurationInterface;
 use Alchemy\BinaryDriver\Exception\ExecutionFailureException;
+use Ramsey\Uuid\Uuid;
 
 class Transcoder extends AbstractBinary
 {
@@ -101,8 +102,8 @@ class Transcoder extends AbstractBinary
     /**
      * Add bookmarks to pdf file
      *
-     * @param string $input     The path to the input file.
-     * @param string $output    The path to the output file.
+     * @param string $input The path to the input file.
+     * @param string $output The path to the output file.
      * @param string $bookmarks The path to the bookmarks file.
      *
      * @return Transcoder
@@ -203,6 +204,44 @@ class Transcoder extends AbstractBinary
         }
 
         return $this;
+    }
+
+    /**
+     * @param string $input The path to the input file.
+     * @param string $destination The path to the output file.
+     * @param integer $pageStart The number of the first page.
+     * @param integer $pageQuantity The number of page to include.
+     * @return $this
+     */
+    public function extractText($input, $destination, $pageStart, $pageQuantity)
+    {
+        if (!file_exists($destination)) {
+            throw new RuntimeException('Ghostscript was unable to extract text from PDF');
+        }
+
+        $outputName = Uuid::uuid4()->toString();
+        try {
+            $this->command(array(
+                '-sDEVICE=txtwrite',
+                '-dNOPAUSE',
+                '-dBATCH',
+                sprintf('-dFirstPage=%d', $pageStart),
+                sprintf('-dLastPage=%d', ($pageStart + $pageQuantity - 1)),
+                '-sOutputFile=' . $destination . '/' . $outputName . '%d',
+                $input,
+            ));
+        } catch (ExecutionFailureException $e) {
+            throw new RuntimeException('Ghostscript was unable to extract text from PDF', $e->getCode(), $e);
+        }
+
+        $pages = array();
+        for ($i = $pageStart; $i <= $pageQuantity; $i++) {
+            $filePath = $destination . '/' . $outputName . $i;
+            array_push($pages, file_get_contents($filePath));
+            unlink($filePath);
+        }
+
+        return json_encode($pages);
     }
 
     /**
