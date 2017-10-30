@@ -232,11 +232,13 @@ class Transcoder extends AbstractBinary
         $pages = array();
         for ($i = $pageStart; $i <= $pageQuantity; $i++) {
             $filePath = $destination . $i;
-            array_push($pages, file_get_contents($filePath));
+            $file = file_get_contents($filePath);
+            $file = trim(preg_replace('/\s+/', ' ', $file));
+            array_push($pages, $file);
             unlink($filePath);
         }
 
-        return json_encode($pages);
+        return $pages;
     }
 
     /**
