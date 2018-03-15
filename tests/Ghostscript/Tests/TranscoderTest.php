@@ -54,8 +54,9 @@ class TranscoderTest extends \PHPUnit_Framework_TestCase
     public function testTranscodeExtractText()
     {
         $input = __DIR__ . '/../../files/test.pdf';
-        $data = $this->object->extractText($input, 1, 10);
+        $data = $this->object->extractText($input);
 
         $this->assertTrue(count($data) > 0);
+        $this->assertEquals(count($data), 90);
     }
 }
