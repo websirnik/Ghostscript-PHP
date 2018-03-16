@@ -217,8 +217,8 @@ class Transcoder extends AbstractBinary {
 				'-sDEVICE=txtwrite',
 				'-dNOPAUSE',
 				'-dBATCH',
-				$pageStart > 0 ? sprintf('-dFirstPage=%d', $pageStart) : '',
-				$pageQuantity > 0 ? sprintf('-dLastPage=%d', ($pageStart + $pageQuantity - 1)) : '',
+				// $pageStart > 0 ? sprintf('-dFirstPage=%d', $pageStart) : '',
+				// $pageQuantity > 0 ? sprintf('-dLastPage=%d', ($pageStart + $pageQuantity - 1)) : '',
 				'-sOutputFile=' . $destination . '%d',
 				$input,
 			));
