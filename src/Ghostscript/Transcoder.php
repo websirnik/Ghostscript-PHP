@@ -232,7 +232,7 @@ class Transcoder extends AbstractBinary {
 			$isPageCounterFinished = false;
 			$pageCounter = 1;
 			// count all pages in temp folder
-			while (!$isCountFinished) {
+			while (!$isPageCounterFinished) {
 				// if file exists increase counter and countinue
 				if (file_exists($destination . $pageCounter)) {
 					$pageCounter++;
