@@ -255,6 +255,11 @@ class Transcoder extends AbstractBinary {
 			$file = nl2br($file);
 			// Remove extra whitepace
 			$file = preg_replace('/\s+/', ' ', $file);
+
+			// Replace Zero Width Space using preg_replace
+			// https://gist.github.com/ahmadazimi/b1f1b8f626d73728f7aa
+			$file = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $file);
+
 			// Convert unicode encoding to html encoding
 			// https://stackoverflow.com/a/37184368/257815
 			$file = preg_replace_callback('/[\x{80}-\x{10FFFF}]/u', function ($m) {
@@ -262,6 +267,7 @@ class Transcoder extends AbstractBinary {
 				$utf = iconv('UTF-8', 'UCS-4', $char);
 				return sprintf("&#x%s;", ltrim(strtoupper(bin2hex($utf)), "0"));
 			}, $file);
+
 			array_push($pages, $file);
 			unlink($filePath);
 		}
