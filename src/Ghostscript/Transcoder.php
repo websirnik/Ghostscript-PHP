@@ -251,15 +251,13 @@ class Transcoder extends AbstractBinary {
 		for ($i = $pageStart; $i <= $pageQuantity; $i++) {
 			$filePath = $destination . $i;
 			$string = file_get_contents($filePath);
+
 			// Convert \r\n to <br>
 			$string = nl2br($string);
 
 			// How to replace decoded Non-breakable space (nbsp)
 			// https://stackoverflow.com/a/40724830/257815
 			$string = preg_replace('/\xc2\xa0/', ' ', $string);
-
-			// Remove extra whitepace
-			$string = preg_replace('/\s+/', ' ', $string);
 
 			// Replace Zero Width Space using preg_replace
 			// https://gist.github.com/ahmadazimi/b1f1b8f626d73728f7aa
@@ -272,6 +270,9 @@ class Transcoder extends AbstractBinary {
 				$utf = iconv('UTF-8', 'UCS-4', $char);
 				return sprintf("&#x%s;", ltrim(strtoupper(bin2hex($utf)), "0"));
 			}, $string);
+
+			// Remove extra whitepace
+			$string = preg_replace('/\s+/', ' ', $string);
 
 			array_push($pages, $string);
 			unlink($filePath);
