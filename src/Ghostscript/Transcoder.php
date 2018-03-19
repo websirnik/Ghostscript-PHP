@@ -250,25 +250,30 @@ class Transcoder extends AbstractBinary {
 		$pages = array();
 		for ($i = $pageStart; $i <= $pageQuantity; $i++) {
 			$filePath = $destination . $i;
-			$file = file_get_contents($filePath);
+			$string = file_get_contents($filePath);
 			// Convert \r\n to <br>
-			$file = nl2br($file);
+			$string = nl2br($string);
+
+			// How to replace decoded Non-breakable space (nbsp)
+			// https://stackoverflow.com/a/40724830/257815
+			$string = preg_replace('/\xc2\xa0/', ' ', $string);
+
 			// Remove extra whitepace
-			$file = preg_replace('/\s+/', ' ', $file);
+			$string = preg_replace('/\s+/', ' ', $string);
 
 			// Replace Zero Width Space using preg_replace
 			// https://gist.github.com/ahmadazimi/b1f1b8f626d73728f7aa
-			$file = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $file);
+			$string = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $string);
 
 			// Convert unicode encoding to html encoding
 			// https://stackoverflow.com/a/37184368/257815
-			$file = preg_replace_callback('/[\x{80}-\x{10FFFF}]/u', function ($m) {
+			$string = preg_replace_callback('/[\x{80}-\x{10FFFF}]/u', function ($m) {
 				$char = current($m);
 				$utf = iconv('UTF-8', 'UCS-4', $char);
 				return sprintf("&#x%s;", ltrim(strtoupper(bin2hex($utf)), "0"));
-			}, $file);
+			}, $string);
 
-			array_push($pages, $file);
+			array_push($pages, $string);
 			unlink($filePath);
 		}
 
